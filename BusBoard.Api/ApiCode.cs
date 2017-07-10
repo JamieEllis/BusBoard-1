@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -121,8 +116,29 @@ namespace BusBoard.Api
             return naptanList;
         }
 
-        public static void PrintBusesForNaptanID(string naptanID, int numberOfBuses)
+        public static string OutputFromPostcode(string postcode, int numberOfStops)
         {
+            var geoResult = APIFun.GetGeoFromPostcode(postcode);
+
+            var naptanListResult = APIFun.GetNaptanIdsFromGeo(geoResult, numberOfStops);
+
+            var temp = "";
+
+            temp += "The " + numberOfStops + " nearest bus stops are:\n\n";
+
+            foreach (var item in naptanListResult)
+            {
+                temp += "NaptanID " + item + ":\n";
+                temp += APIFun.PrintBusesForNaptanID(item, 5) + "\n";
+            }
+
+            return temp;
+        }
+
+        public static string PrintBusesForNaptanID(string naptanID, int numberOfBuses)
+        {
+            var temp = "";
+
             var json = tflApi.GetJSONFromBusStop(naptanID);
             var data = jsonDeserializer.Deserialize<List<BusfinderSteve>>(json);
 
@@ -145,9 +161,11 @@ namespace BusBoard.Api
 
             foreach (var item in recorded)
             {
-                Console.WriteLine("Bus on route {0} to {1} will arrive in {2} minutes.", item.lineName,
-                    item.destinationName, 1 + (item.timeToStation / 60));
+                temp += "Bus on route " + item.lineName + " to " + item.destinationName + " will arrive in " +
+                        (1 + (item.timeToStation / 60)) + " minutes.\n";
             }
+
+            return temp;
         }
     }
 }

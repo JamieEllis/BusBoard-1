@@ -1,4 +1,6 @@
-﻿@model BusBoard.Web.ViewModels.BusInfo
+﻿@using BusBoard.Api
+
+@model BusBoard.Web.ViewModels.BusInfo
 @{
   ViewBag.Title = "Bus Information";
 }
@@ -6,5 +8,5 @@
 <h2>BusInfo</h2>
 
 <div class="row">
-    <p>You entered postcode @Model.PostCode</p>
+    <p>You entered postcode @APIFun.OutputFromPostcode(Model.PostCode, 2)</p>
 </div>

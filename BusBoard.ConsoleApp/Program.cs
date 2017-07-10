@@ -1,20 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using RestSharp;
-using RestSharp.Authenticators;
 using RestSharp.Deserializers;
 using BusBoard.Api;
 
 namespace BusBoard.ConsoleApp
 {  
-    class Program
+    public class Program
     {
         private static JsonDeserializer jsonDeserializer = new JsonDeserializer();
+
+/*        public static string OutputFromPostcode(string postcode, int numberOfStops)
+        {
+            var geoResult = APIFun.GetGeoFromPostcode(postcode);
+
+            var naptanListResult = APIFun.GetNaptanIdsFromGeo(geoResult, numberOfStops);
+
+            var temp = "";
+
+            temp += "The " + numberOfStops + " nearest bus stops are:\n\n";
+
+            foreach (var item in naptanListResult)
+            {
+                temp += "NaptanID " + item + ":\n";
+                temp += APIFun.PrintBusesForNaptanID(item, 5) + "\n";
+            }
+
+            return temp;
+        }*/
 
         static void Main()
         {
@@ -54,6 +66,7 @@ namespace BusBoard.ConsoleApp
             }
         }*/
 
+            /*
             while (true)
             {
                 Console.Write("Please enter a postcode: ");
@@ -73,6 +86,14 @@ namespace BusBoard.ConsoleApp
                     APIFun.PrintBusesForNaptanID(item, 5);
                     Console.WriteLine();
                 }
+            }
+            */
+
+            while (true)
+            {
+                Console.Write("Please enter a postcode: ");
+                var input = Console.ReadLine();
+                Console.WriteLine(APIFun.OutputFromPostcode(input, 2));
             }
         }
     }
