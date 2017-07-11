@@ -88,13 +88,15 @@ namespace BusBoard.ConsoleApp
                 }
             }
             */
-
+            
+            /*
             while (true)
             {
                 Console.Write("Please enter a postcode: ");
                 var input = Console.ReadLine();
                 Console.WriteLine(APIFun.OutputFromPostcode(input, 2));
             }
+            */
         }
     }
 }

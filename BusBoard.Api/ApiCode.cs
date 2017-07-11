@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -6,6 +7,12 @@ using RestSharp.Deserializers;
 
 namespace BusBoard.Api
 {
+    public class BusStationData
+    {
+        public string naptanId { get; set; }
+        public string commonName { get; set; }
+    }
+
     public class PostcodeAPI
     {
         public IRestResponse GetJSONFromPostcode(string postcode)
@@ -78,6 +85,11 @@ namespace BusBoard.Api
         public double latitude { get; set; }
     }
 
+    public class BadPostcodeException : System.Exception
+    {
+        
+    }
+
     public class APIFun
     {
         private static TFLAPI tflApi = new TFLAPI("f9d3c4a9", "b5a44afe70eb37aa5ab511614470e9d5");
@@ -87,6 +99,12 @@ namespace BusBoard.Api
         public static GeolocatorHarold GetGeoFromPostcode(string postcode)
         {
             var json = postcodeApi.GetJSONFromPostcode(postcode);
+
+            // Error handling.
+            if (json.StatusCode != HttpStatusCode.OK)
+            {
+                throw new BadPostcodeException();
+            }
 
             var resultStuff = JObject.Parse(json.Content)["result"].ToString();
             var lat = JObject.Parse(resultStuff)["latitude"].ToObject<double>();
@@ -99,9 +117,9 @@ namespace BusBoard.Api
             };
         }
 
-        public static List<string> GetNaptanIdsFromGeo(GeolocatorHarold geo, int numberOfStops)
+        public static List<BusStationData> GetBusStationDataFromGeo(GeolocatorHarold geo, int numberOfStops)
         {
-            var naptanList = new List<string>();
+            var naptanList = new List<BusStationData>();
 
             var jsonRad = tflApi.GetJSONFromRadLatLong(1000, geo.latitude, geo.longitude);
 
@@ -109,36 +127,22 @@ namespace BusBoard.Api
             for (int i = 0; i < numberOfStops; ++i)
             {
                 var obj = resultStuffRad[i];
-                var naptanID = JObject.Parse(obj.ToString())["naptanId"].ToString();
-                naptanList.Add(naptanID);
+                var naptanIdStore = JObject.Parse(obj.ToString())["naptanId"].ToString();
+                var commonNameStore = JObject.Parse(obj.ToString())["commonName"].ToString();
+                naptanList.Add(new BusStationData { naptanId = naptanIdStore, commonName = commonNameStore});
             }
 
             return naptanList;
         }
 
-        public static string OutputFromPostcode(string postcode, int numberOfStops)
+        public static List<BusStationData> GetBusStationDataFromPostcode(string postcode, int numberOfStops)
         {
             var geoResult = APIFun.GetGeoFromPostcode(postcode);
-
-            var naptanListResult = APIFun.GetNaptanIdsFromGeo(geoResult, numberOfStops);
-
-            var temp = "";
-
-            temp += "The " + numberOfStops + " nearest bus stops are:\n\n";
-
-            foreach (var item in naptanListResult)
-            {
-                temp += "NaptanID " + item + ":\n";
-                temp += APIFun.PrintBusesForNaptanID(item, 5) + "\n";
-            }
-
-            return temp;
+            return APIFun.GetBusStationDataFromGeo(geoResult, numberOfStops);
         }
 
-        public static string PrintBusesForNaptanID(string naptanID, int numberOfBuses)
+        public static List<BusfinderSteve> GetSoonestBusesForNaptanID(string naptanID, int numberOfBuses)
         {
-            var temp = "";
-
             var json = tflApi.GetJSONFromBusStop(naptanID);
             var data = jsonDeserializer.Deserialize<List<BusfinderSteve>>(json);
 
@@ -159,13 +163,7 @@ namespace BusBoard.Api
                 recorded.Add(minItem);
             }
 
-            foreach (var item in recorded)
-            {
-                temp += "Bus on route " + item.lineName + " to " + item.destinationName + " will arrive in " +
-                        (1 + (item.timeToStation / 60)) + " minutes.\n";
-            }
-
-            return temp;
+            return recorded;
         }
     }
 }

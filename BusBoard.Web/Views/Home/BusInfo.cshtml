@@ -5,8 +5,33 @@
   ViewBag.Title = "Bus Information";
 }
 
-<h2>BusInfo</h2>
+<h2><marquee scrollamount="10"><img src ="https://lh3.googleusercontent.com/e3uaf2PFOeq067hNBDpSSE7Eukf-dAF1jQYsTqBWtEy8kOXH1O6N38vZBK0-cjsI0w=w300"></img><font size ="900"><b>Bus Information</b><t</font><img src = "https://lh3.googleusercontent.com/e3uaf2PFOeq067hNBDpSSE7Eukf-dAF1jQYsTqBWtEy8kOXH1O6N38vZBK0-cjsI0w=w300"></img></marquee></h2>
 
-<div class="row">
-    <p>You entered postcode @APIFun.OutputFromPostcode(Model.PostCode, 2)</p>
+<meta http-equiv="refresh" content="30">
+
+<div class="row">    
+    <br />
+        
+    <h1>For your postcode (@Model.PostCode) the closest stops are:</h1>
+
+    @foreach (var table in Model.TableData)
+    {
+        <h2>@table.title</h2>
+        <table style="width:100%">
+            <tr>
+                <th>Line</th>
+                <th>Destination</th>
+                <th>Time to Arrival</th>
+            </tr>
+            @foreach (var line in table.data)
+            {
+                <tr>
+                    <td>@line.lineName</td>
+                    <td>@line.destinationName</td>
+                    <td>@line.arrivalMessage</td>
+                </tr>
+            }
+        </table>
+    }
 </div>
+
